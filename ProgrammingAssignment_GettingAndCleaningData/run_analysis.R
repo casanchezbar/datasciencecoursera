@@ -68,6 +68,8 @@ names(final_data)[1] <- "act_name"
 
 tidy <- aggregate(x = final_data[,c(-1,-2)], by = list(final_data$act_name, final_data$subject), FUN = mean)
 
+names(tidy)[1] <- "act_name"
+names(tidy)[2] <- "subject"
 
 
 write.table(tidy, 'assigment_data_results.txt', row.names = FALSE) 

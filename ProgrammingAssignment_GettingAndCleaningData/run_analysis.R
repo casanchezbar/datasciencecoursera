@@ -68,10 +68,19 @@ run_analysis <- function() {
   
   tidy <- aggregate(x = final_data[,c(-1,-2)], by = list(final_data$act_name, final_data$subject), FUN = mean)
   
-  names(tidy)[1] <- "act_name"
-  names(tidy)[2] <- "subject"
   
-  tidy
+  names(tidy) <- gsub("[\\(\\)-]", "", names(tidy))
+  names(tidy) <- gsub("^f", "frequency", names(tidy))
+  names(tidy) <- gsub("^t", "time", names(tidy))
+  names(tidy) <- gsub("Acc", "Accelerometer", names(tidy))
+  names(tidy) <- gsub("Gyro", "Gyroscope", names(tidy))
+  names(tidy) <- gsub("Mag", "Magnitude", names(tidy))
+  names(tidy) <- gsub("Gyro", "Gyroscope", names(tidy))
+  names(tidy) <- gsub("Freq", "Frequency", names(tidy))
+  
+  names(tidy) <- paste0("average",names(tidy))
+  names(tidy)[1] <- "activity_name"
+  names(tidy)[2] <- "subject_id"
+  
+  write.table(tidy, 'assignment_data_results.txt', row.names = FALSE) 
 }
-
-write.table(run_analysis(), 'assigment_data_results.txt', row.names = FALSE) 

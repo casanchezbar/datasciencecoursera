@@ -1,0 +1,154 @@
+---
+title: "PeerGradedAssignment"
+author: "csanchez"
+date: "September 9, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(caret)
+```
+
+## Background
+
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, the goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har
+
+
+Six young healthy participants were asked to perform one set of 10 repetitions of the Unilateral Dumbbell Biceps Curl in five different fashions:
+
+* Class A - exactly according to the specification
+* Class B - throwing the elbows to the front
+* Class C - lifting the dumbbell only halfway
+* Class D - lowering the dumbbell only halfway
+* Class E - throwing the hips to the front
+
+
+Class A corresponds to the specified execution of the exercise, while the other 4 classes correspond to common mistakes. Participants were supervised by an experienced weight lifter to make sure the execution complied to the manner they were supposed to simulate. The exercises were performed by six male participants aged between 20-28 years, with little weight lifting experience. Researchers made sure that all participants could easily simulate the mistakes in a safe and controlled manner by using a relatively light dumbbell (1.25kg).
+
+
+## Load the Data
+
+The training data for this project are available here:
+
+  * https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
+
+The test data are available here:
+
+  * https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
+
+The data for this project come from this source: http://groupware.les.inf.puc-rio.br/har. 
+
+
+```{r cache=T, echo=F,message=F, warning=F}
+training <- read_csv('https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv')
+validation <- read_csv('https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv')
+```
+
+
+
+
+
+## Clean data
+
+The columns with a lot of missing values are removed. And columns not representative for what we're trying to predict are removed to (timestamp, username, etc).
+
+We are only interested in the columns related to the sensors (gyroscope, accelerometer).
+
+
+```{r}
+
+# remove columns
+training <- training[,-1]
+training <- training[,-grep('kurtosis_', colnames(training))]
+training <- training[,-grep('var_', colnames(training))]
+training <- training[,-grep('avg_', colnames(training))]
+training <- training[,-grep('stddev_', colnames(training))]
+training <- training[,-grep('min_', colnames(training))]
+training <- training[,-grep('max_', colnames(training))]
+training <- training[,-grep('skewness_', colnames(training))]
+training <- training[,-grep('amplitude_', colnames(training))]
+training <- training[,-grep('time', colnames(training))]
+training <- training[,-grep('total_', colnames(training))]
+training <- training[,-grep('window', colnames(training))]
+training <- training[,-grep('user_name', colnames(training))]
+
+
+```
+
+
+
+
+## Model Development
+
+
+### Split training and testing data sets
+
+We use the 70% of the data for the training data set and the remaining 30% for testing purposes
+
+```{r}
+set.seed(998)
+inTraining <- createDataPartition(training$classe, p = .70, list = FALSE)
+training <- training[ inTraining,]
+testing  <- training[-inTraining,]
+
+```
+
+
+### Cross validations and model training
+
+The Generalized Boosted Regression Model (GBM) is going to be fitted with the training data. GBM constructs a forward stage-wise additive model by implementing gradient descent in function space
+
+The resampling method is a 6-fold-cross-validation
+
+The accuracy in the training data is close to 95%. Where the final values used for the model are n.trees = 150, interaction.depth = 3, shrinkage = 0.1 and n.minobsinnode = 10.
+
+
+```{r cache=T}
+
+control <- trainControl(method='cv', 6)
+
+set.seed(898)
+gbmFit <- train(classe ~ ., data = training, 
+                 method = "gbm", 
+                 trControl = control,
+                 verbose = FALSE)
+
+ggplot(gbmFit) 
+
+```
+
+
+```{r}
+gbmFit
+```
+
+
+### Model performance in the testing set
+
+In order to validate the accuracy of the previusly fitted model is necessary to demonstrate tha the model predicts well in new data.
+
+The accuracy on new data is close to 97%
+
+```{r}
+
+pred <- predict(gbmFit, testing) 
+
+confusionMatrix(pred, as.factor(testing$classe))
+```
+
+
+
+
+## Validate results
+
+The model is validated against this set:
+  https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
+  
+  
+```{r}
+predict(gbmFit, validation[, colnames(training[,-49])]) 
+
+```
+

@@ -1,0 +1,38 @@
+---
+title: "PeerAssignment2"
+author: "Carlos Sanchez"
+date: "9/17/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Interactive Maps using Leaflet
+
+We're going to use the location of the New York Subway Stations in order to show the Leaflet interactive Maps
+
+The data can be found in this URL: 
+ https://data.cityofnewyork.us/Transportation/Subway-Stations/arq3-7z49
+
+
+
+```{r echo=FALSE, comment=F, warning=F, error=FALSE,}
+library(leaflet)
+library(tidyverse)
+
+subway <- read.csv("DOITT_SUBWAY_STATION_01_13SEPT2010.csv")
+subway <- separate(data=subway,the_geom, c("POINT","long","lat"), sep=" ")
+
+options(digits = 16)
+
+subway$lat <- as.numeric(str_replace(subway$lat,"\\)",""))
+subway$long <- as.numeric(str_replace(subway$long,"\\(",""))
+
+
+leaflet(data = subway) %>%
+  addTiles() %>%
+  addCircleMarkers(~long, ~lat, popup = ~as.character(NAME), radius = 1.5)
+
+```

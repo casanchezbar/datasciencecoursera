@@ -1,0 +1,29 @@
+---
+title: "PeerAssignmet3"
+author: "Carlos Sanchez"
+date: "9/17/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Interactive Plots using Plotly
+
+We're going to use the rates of people who complete the College in US States from 1970 to 2017 in order to show the Plotly interactive plots
+
+The data can be found in this URL: 
+    https://data.ers.usda.gov/reports.aspx?ID=17829#Pa437f09210e34d798292928f388833c9_2_228iT2
+ 
+ 
+```{r comment=FALSE, warning=FALSE,error=FALSE}
+library(ggplot2)
+library(plotly)
+
+college <- read.csv("CompletingCollegeUS.csv")
+
+p <- ggplot(college) + aes(x=Year, y=Percent, color=Location) + geom_point() + ggtitle("College completion rates in US, 1970-2017")
+
+ggplotly(p)
+```

@@ -18,10 +18,33 @@ The data used in this assigment can be found in here:
 
 
 
-Data
+Create Plot
 ========================================================
 
-![plot of chunk unnamed-chunk-1](PeerAssignment4Presentation-figure/unnamed-chunk-1-1.png)
+
+```r
+library(ggplot2)
+library(tidyr)
+
+data("USArrests")
+
+arrests <- USArrests
+arrests$state <- rownames(USArrests)
+arrests <- gather(arrests, 'type', 'arrests',-c(UrbanPop, state))
+
+plot <- ggplot(arrests, 
+                   aes(x=UrbanPop, y=arrests,color=type)) + 
+                geom_point() + 
+                ggtitle('US Arrests in 1975') + 
+                xlab('Urban Population') +
+                ylab('Arrests per 100 000 residents')
+```
+
+Final Plot
+========================================================
+
+![plot of chunk unnamed-chunk-2](PeerAssignment4Presentation-figure/unnamed-chunk-2-1.png)
+
 
 Description
 ========================================================

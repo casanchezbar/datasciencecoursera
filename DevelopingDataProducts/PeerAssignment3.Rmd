@@ -17,9 +17,9 @@ The data can be found in this URL:
     https://data.ers.usda.gov/reports.aspx?ID=17829#Pa437f09210e34d798292928f388833c9_2_228iT2
  
  
-```{r comment=FALSE, warning=FALSE,error=FALSE}
-library(ggplot2)
+```{r comment=FALSE, warning=FALSE,error=FALSE, echo=FALSE}
 library(plotly)
+library(ggplot2)
 
 college <- read.csv("CompletingCollegeUS.csv")
 
